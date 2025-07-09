@@ -1,1 +1,0 @@
-# mobile-lp-recorder-app
