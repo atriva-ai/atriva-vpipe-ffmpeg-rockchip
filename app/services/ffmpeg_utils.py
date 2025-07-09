@@ -137,7 +137,7 @@ def decode_video2frames_in_jpeg(input_path: str, output_path: str, force_format:
     # get video info
     print(f"Getting video info from input: {input_path}")
     v_info = get_video_info(input_path)
-    print(f"Video format: {v_info["format"]}, codec: {v_info["codec"]}, width: {v_info["width"]}, height: {v_info["height"]}, fps: {v_info["fps"]}")
+    print(f"Video format: {v_info['format']}, codec: {v_info['codec']}, width: {v_info['width']}, height: {v_info['height']}, fps: {v_info['fps']}")
 
     # Use camera_id for output folder if provided, otherwise use video name
     if camera_id:
