@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+ffmpeg-python
+requests
+python-multipart
