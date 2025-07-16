@@ -114,6 +114,7 @@ async def decode_video(
     fps: Optional[int] = Form(1),
     force_format: Optional[str] = Form(None)
 ):
+    print(f"[DEBUG] /decode/ called with camera_id={camera_id}, url={url}, fps={fps}, force_format={force_format}, file={'provided' if file else 'none'}")
     """Start decoding for a camera and register the process."""
     if not file and not url:
         raise HTTPException(status_code=400, detail="Either a file or a URL must be provided.")
@@ -154,25 +155,70 @@ async def decode_video(
     cleanup_camera_frames(camera_id)
 
     try:
+        print(f"[DEBUG] Starting decode task for camera_id={camera_id}")
         # Run ffmpeg decode asynchronously in a subprocess
         print(f"Starting decode for camera {camera_id} with input: {input_path}")
         
-        # Build ffmpeg command
+        # Build ffmpeg command with Rockchip hardware acceleration
         input_path_str = str(input_path)
-        if input_path_str.startswith('rtsp://'):
-            ffmpeg_cmd = [
-                "ffmpeg", "-rtsp_transport", "tcp", "-i", input_path_str,
-                "-vf", f"fps={fps},format=rgb24",
-                f"{output_folder}/frame_%04d.jpg"
-            ]
-        else:
-            ffmpeg_cmd = [
-                "ffmpeg", "-i", input_path_str,
-                "-vf", f"fps={fps},format=rgb24",
-                f"{output_folder}/frame_%04d.jpg"
-            ]
         
-        print(f"Running ffmpeg command: {ffmpeg_cmd}")
+        # Get the best hardware acceleration for RK3588
+        from app.services.ffmpeg_utils import get_best_hwaccel
+        hw_accel = get_best_hwaccel(force_format)
+        print(f"Using RK3588 hardware acceleration: {hw_accel}")
+        
+        if input_path_str.startswith('rtsp://'):
+            if hw_accel == "rkmpp":
+                ffmpeg_cmd = [
+                    "ffmpeg", "-hwaccel", "rkmpp", "-rtsp_transport", "tcp", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+            elif hw_accel == "v4l2":
+                ffmpeg_cmd = [
+                    "ffmpeg", "-hwaccel", "v4l2", "-rtsp_transport", "tcp", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+            elif hw_accel == "rga":
+                ffmpeg_cmd = [
+                    "ffmpeg", "-rtsp_transport", "tcp", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24,rga=format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+            else:
+                ffmpeg_cmd = [
+                    "ffmpeg", "-rtsp_transport", "tcp", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+        else:
+            if hw_accel == "rkmpp":
+                ffmpeg_cmd = [
+                    "ffmpeg", "-hwaccel", "rkmpp", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+            elif hw_accel == "v4l2":
+                ffmpeg_cmd = [
+                    "ffmpeg", "-hwaccel", "v4l2", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+            elif hw_accel == "rga":
+                ffmpeg_cmd = [
+                    "ffmpeg", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24,rga=format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+            else:
+                ffmpeg_cmd = [
+                    "ffmpeg", "-i", input_path_str,
+                    "-vf", f"fps={fps},format=rgb24",
+                    f"{output_folder}/frame_%04d.jpg"
+                ]
+        
+        print(f"Running RK3588 FFmpeg command: {ffmpeg_cmd}")
         proc = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         # Register the task as running
@@ -300,14 +346,26 @@ async def health_check():
 # Debug endpoint
 @router.get("/debug/")
 async def debug_info():
-    """Debug information for video pipeline service"""
+    """Debug information for video pipeline service on Rockchip RK3588"""
     import socket
     import os
+    from app.services.ffmpeg_utils import get_all_hwaccel, get_best_hwaccel
+    
+    # Get hardware acceleration information
+    hw_accel_info = get_all_hwaccel()
+    best_hw_accel = get_best_hwaccel()
+    
     return {
         "status": "running",
         "service": "video-pipeline",
+        "platform": "Rockchip RK3588",
         "hostname": socket.gethostname(),
         "port": 8002,
+        "hardware_acceleration": {
+            "available": hw_accel_info.get("available_hw_accelerations", []),
+            "best_option": best_hw_accel,
+            "rk3588_options": ["rkmpp", "v4l2", "rga", "none"]
+        },
         "environment": {
             "FFMPEG_PATH": os.getenv("FFMPEG_PATH", "ffmpeg"),
             "FFPROBE_PATH": os.getenv("FFPROBE_PATH", "ffprobe")

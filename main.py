@@ -11,11 +11,11 @@ from config import UPLOAD_FOLDER, OUTPUT_FOLDER
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Video Pipeline API", version="1.0")
+app = FastAPI(title="Video Pipeline API (Rockchip RK3588)", version="1.0")
 
 # Include Routes
 app.include_router(router)
 
 @app.get("/")
 def root():
-    return {"message": "FFMPEG Video Pipeline API is running!"}
+    return {"message": "FFMPEG Video Pipeline API is running on Rockchip RK3588!"}

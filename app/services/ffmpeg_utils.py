@@ -102,11 +102,11 @@ def get_all_hwaccel():
     return {"available_hw_accelerations": hw_accels}
 
 def get_best_hwaccel(force_format=None):
-    """Check available hardware acceleration and return the best option."""
+    """Check available hardware acceleration and return the best option for Rockchip RK3588."""
     if force_format and force_format in HW_ACCEL_OPTIONS:
         return force_format  # Use the forced format if specified and valid
     
-    # Always include "none" as a fallback option
+    # Test Rockchip hardware acceleration options in priority order
     for accel in HW_ACCEL_OPTIONS:
         if accel == "none":
             print(f"✅ Using software decoding (none)")
@@ -120,9 +120,12 @@ def get_best_hwaccel(force_format=None):
 
             # A working hwaccel should return success (exit code 0)
             if result.returncode == 0:
-                print(f"✅ {accel} is supported!")
+                print(f"✅ {accel} is supported on RK3588!")
                 return accel
+            else:
+                print(f"❌ {accel} test failed: {result.stderr}")
         except FileNotFoundError:
+            print(f"❌ {accel} not available")
             continue
     
     # If no hardware acceleration works, fall back to software decoding
@@ -130,9 +133,9 @@ def get_best_hwaccel(force_format=None):
     return "none"
 
 def decode_video2frames_in_jpeg(input_path: str, output_path: str, force_format: str = "none", fps: int = 1, camera_id: str = None):
-    """Decode video and extract frames as JPEG at specified FPS."""
+    """Decode video and extract frames as JPEG at specified FPS using Rockchip RK3588 hardware acceleration."""
     hw_accel = get_best_hwaccel(force_format)
-    print(f"Transcoding videos to JPEGs using HW mode: {hw_accel}")
+    print(f"Transcoding videos to JPEGs using RK3588 HW mode: {hw_accel}")
     
     # get video info
     print(f"Getting video info from input: {input_path}")
@@ -155,7 +158,7 @@ def decode_video2frames_in_jpeg(input_path: str, output_path: str, force_format:
     output_template = str(video_output_folder / f"{video_name}_%04d.jpg")
     print(f"Output template: {output_template}")
 
-    # Build command with RTSP transport support
+    # Build command with Rockchip-specific hardware acceleration support
     if hw_accel == "none":
         if input_path.startswith('rtsp://'):
             command = [
@@ -169,20 +172,63 @@ def decode_video2frames_in_jpeg(input_path: str, output_path: str, force_format:
                 "-vf", f"fps={fps},format=rgb24",
                 output_template
             ]
-    else:
+    elif hw_accel == "rkmpp":
+        # Use Rockchip MPP hardware acceleration
         if input_path.startswith('rtsp://'):
             command = [
-                FFMPEG_PATH, "-hwaccel", hw_accel, "-rtsp_transport", "tcp", "-i", input_path,
+                FFMPEG_PATH, "-hwaccel", "rkmpp", "-rtsp_transport", "tcp", "-i", input_path,
                 "-vf", f"fps={fps},format=rgb24",
                 output_template
             ]
         else:
             command = [
-                FFMPEG_PATH, "-hwaccel", hw_accel, "-i", input_path,
+                FFMPEG_PATH, "-hwaccel", "rkmpp", "-i", input_path,
                 "-vf", f"fps={fps},format=rgb24",
                 output_template
             ]
-    print(f"Running command: {command}")
+    elif hw_accel == "v4l2":
+        # Use Video4Linux2 hardware acceleration
+        if input_path.startswith('rtsp://'):
+            command = [
+                FFMPEG_PATH, "-hwaccel", "v4l2", "-rtsp_transport", "tcp", "-i", input_path,
+                "-vf", f"fps={fps},format=rgb24",
+                output_template
+            ]
+        else:
+            command = [
+                FFMPEG_PATH, "-hwaccel", "v4l2", "-i", input_path,
+                "-vf", f"fps={fps},format=rgb24",
+                output_template
+            ]
+    elif hw_accel == "rga":
+        # Use Rockchip RGA for image processing acceleration
+        if input_path.startswith('rtsp://'):
+            command = [
+                FFMPEG_PATH, "-rtsp_transport", "tcp", "-i", input_path,
+                "-vf", f"fps={fps},format=rgb24,rga=format=rgb24",
+                output_template
+            ]
+        else:
+            command = [
+                FFMPEG_PATH, "-i", input_path,
+                "-vf", f"fps={fps},format=rgb24,rga=format=rgb24",
+                output_template
+            ]
+    else:
+        # Fallback to software decoding
+        if input_path.startswith('rtsp://'):
+            command = [
+                FFMPEG_PATH, "-rtsp_transport", "tcp", "-i", input_path,
+                "-vf", f"fps={fps},format=rgb24",
+                output_template
+            ]
+        else:
+            command = [
+                FFMPEG_PATH, "-i", input_path,
+                "-vf", f"fps={fps},format=rgb24",
+                output_template
+            ]
+    print(f"Running RK3588 FFmpeg command: {command}")
 
     result = subprocess.run(command, capture_output=True, text=True)
 

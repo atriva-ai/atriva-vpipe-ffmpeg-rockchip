@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-venv \
     python3-pip \
+    curl \
+    procps \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create a virtual environment
@@ -46,3 +48,5 @@ LABEL description="Production image with Python 3.12, FastAPI, and FFmpeg with R
 # Command to run the FastAPI app
 ENTRYPOINT ["python", "-m", "uvicorn"]
 CMD ["main:app", "--host", "0.0.0.0", "--port", "8002"]
+
+ENV PATH="/usr/lib/jellyfin-ffmpeg:$PATH"

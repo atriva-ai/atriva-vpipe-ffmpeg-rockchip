@@ -1,21 +1,40 @@
 # Atriva Video Pipeline API Service with FFmpeg (Rockchip Edition)
 
 ## Overview
-This project is an **API-based video pipeline service** that utilizes **FFmpeg** for decoding, hardware-accelerated transcoding, and extracting frames from videos. The API supports processing videos from a file upload or a direct URL input.
+This project is an **API-based video pipeline service** that utilizes **FFmpeg** for decoding, hardware-accelerated transcoding, and extracting frames from videos. The API supports processing videos from a file upload or a direct URL input, optimized for **Rockchip RK3588** SoCs.
 
 ## Features
 - 🚀 **Video Upload & Processing**
 - 🎥 **Supports File & URL-based Input**
-- ⚡ **Hardware Acceleration** (Rockchip RKMPP/RGA)
+- ⚡ **Rockchip Hardware Acceleration** (RKMPP/V4L2/RGA)
 - 📸 **Extract Frames as JPEGs**
 - 📊 **Retrieve Video Metadata**
 - 🐳 **Dockerized Environment**
 
-## Hardware Acceleration: Rockchip Support
+## Hardware Acceleration: Rockchip RK3588 Support
 This image is based on [`nyanmisaka/jellyfin:latest-rockchip`](https://hub.docker.com/r/nyanmisaka/jellyfin), which includes:
 - FFmpeg with Rockchip MPP (Media Process Platform) and RGA (2D Raster Graphic Acceleration) support
 - Optimized for RK3588/3588S SoCs and compatible Rockchip devices
 - Zero-copy transcoding pipeline for efficient video processing
+
+### Rockchip Hardware Acceleration Options
+The service automatically detects and uses the best available hardware acceleration:
+
+1. **RKMPP** (`rkmpp`): Rockchip Media Process Platform
+   - Hardware video decoder/encoder
+   - Best performance for video processing
+   - Primary choice for RK3588
+
+2. **V4L2** (`v4l2`): Video4Linux2
+   - Hardware acceleration via V4L2 interface
+   - Fallback option if RKMPP is not available
+
+3. **RGA** (`rga`): Rockchip Graphics Acceleration
+   - 2D graphics acceleration for image processing
+   - Used for format conversion and scaling
+
+4. **Software** (`none`): CPU-based processing
+   - Fallback when hardware acceleration is not available
 
 ### Required Devices for Hardware Acceleration
 To enable hardware acceleration, you must pass the following devices to Docker:
