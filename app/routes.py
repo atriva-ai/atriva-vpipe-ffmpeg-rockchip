@@ -149,7 +149,9 @@ async def decode_video(
 
     # Prepare output folder for this camera
     output_folder = OUTPUT_FOLDER / camera_id
+    print(f"[DEBUG] About to create output folder: {output_folder}")
     output_folder.mkdir(parents=True, exist_ok=True)
+    print(f"[DEBUG] Output folder created (or already exists): {output_folder} (exists={output_folder.exists()})")
 
     # Clean up any existing frames for this camera before starting new decode
     cleanup_camera_frames(camera_id)
