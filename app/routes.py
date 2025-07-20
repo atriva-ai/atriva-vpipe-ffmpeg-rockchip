@@ -223,6 +223,27 @@ async def decode_video(
         print(f"Running RK3588 FFmpeg command: {ffmpeg_cmd}")
         proc = subprocess.Popen(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
+        # Wait a short time to check if the process starts successfully
+        import time
+        time.sleep(1)
+        
+        # Check if process is still running and if there are any immediate errors
+        if proc.poll() is not None:
+            # Process exited immediately - get error output
+            stdout, stderr = proc.communicate()
+            error_output = stderr.decode('utf-8', errors='ignore')
+            error_msg = f"FFmpeg process failed to start: {error_output}"
+            print(f"Error in decode for camera {camera_id}: {error_msg}")
+            
+            with task_lock:
+                decode_tasks[camera_id] = {
+                    'process': None,
+                    'output_folder': str(output_folder),
+                    'status': 'error',
+                    'last_error': error_msg
+                }
+            raise HTTPException(status_code=500, detail=error_msg)
+        
         # Register the task as running
         with task_lock:
             decode_tasks[camera_id] = {
@@ -387,29 +408,48 @@ async def cleanup_frames(camera_id: Optional[str] = Form(None)):
 @router.get("/latest-frame/")
 async def get_latest_frame(camera_id: str):
     """Get the latest decoded frame for a camera"""
-    with task_lock:
-        task = decode_tasks.get(camera_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="No decode task found for this camera.")
-        
-        output_folder = Path(task['output_folder'])
-        if not output_folder.exists():
-            raise HTTPException(status_code=500, detail="Output folder does not exist for this camera.")
-        
-        frame_count = get_frame_count(output_folder)
-        if frame_count == 0:
-            raise HTTPException(status_code=500, detail="No frames found in the output folder for this camera.")
-        
-        latest_frame_path = output_folder / f"frame_{frame_count - 1:04d}.jpg"
-        if not latest_frame_path.exists():
-            raise HTTPException(status_code=500, detail="Latest frame does not exist in the output folder for this camera.")
-        
-        # Check if the latest frame is too old (more than 5 minutes)
-        current_time = time.time()
-        frame_mtime = latest_frame_path.stat().st_mtime
-        if current_time - frame_mtime > 300:  # 5 minutes = 300 seconds
-            print(f"Warning: Latest frame for camera {camera_id} is too old ({current_time - frame_mtime:.1f}s), cleaning up")
-            cleanup_camera_frames(camera_id)
-            raise HTTPException(status_code=500, detail="Latest frame is too old, frames have been cleaned up")
-        
-        return FileResponse(latest_frame_path)
+    try:
+        with task_lock:
+            task = decode_tasks.get(camera_id)
+            if not task:
+                raise HTTPException(status_code=404, detail="No decode task found for this camera.")
+            
+            output_folder = Path(task['output_folder'])
+            if not output_folder.exists():
+                raise HTTPException(status_code=500, detail="Output folder does not exist for this camera.")
+            
+            frame_count = get_frame_count(output_folder)
+            if frame_count == 0:
+                # Check if there's an error in the task
+                if task.get('last_error'):
+                    raise HTTPException(status_code=500, detail=f"No frames found. Decoder error: {task['last_error']}")
+                else:
+                    raise HTTPException(status_code=500, detail="No frames found in the output folder for this camera.")
+            
+            # Find the latest frame by checking file modification times
+            frame_files = list(output_folder.glob("*.jpg"))
+            if not frame_files:
+                raise HTTPException(status_code=500, detail="No frame files found in the output folder for this camera.")
+            
+            # Get the most recently modified frame file
+            latest_frame_path = max(frame_files, key=lambda f: f.stat().st_mtime)
+            
+            if not latest_frame_path.exists():
+                raise HTTPException(status_code=500, detail="Latest frame file does not exist.")
+            
+            # Check if the latest frame is too old (more than 5 minutes)
+            current_time = time.time()
+            frame_mtime = latest_frame_path.stat().st_mtime
+            if current_time - frame_mtime > 300:  # 5 minutes = 300 seconds
+                print(f"Warning: Latest frame for camera {camera_id} is too old ({current_time - frame_mtime:.1f}s), cleaning up")
+                cleanup_camera_frames(camera_id)
+                raise HTTPException(status_code=500, detail="Latest frame is too old, frames have been cleaned up")
+            
+            return FileResponse(latest_frame_path)
+            
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        print(f"Error getting latest frame for camera {camera_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get latest frame: {str(e)}")
