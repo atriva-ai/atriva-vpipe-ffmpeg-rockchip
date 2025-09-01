@@ -98,6 +98,48 @@ To list supported hardware acceleration methods inside the container:
 ffmpeg -hwaccels
 ```
 
+## 🧪 Profiling and Testing Tools
+
+This project includes comprehensive profiling and testing tools located in the `profiler/` directory. These tools help verify hardware acceleration, test performance, and analyze results.
+
+### Quick Profiling Commands
+
+#### Hardware Acceleration Verification
+```bash
+# From root directory
+python3 run_profiler.py verify_hw_accel.py
+
+# Or directly from profiler directory
+cd profiler
+python3 verify_hw_accel.py
+```
+
+#### Performance Testing
+```bash
+# Run basic profiling test
+python3 run_profiler.py profiler_test_app.py --channels 3 --duration 30
+
+# Analyze results
+python3 run_profiler.py analyze_results.py profiling_results.json
+```
+
+#### Direct FFmpeg Testing
+```bash
+# Test FFmpeg hardware acceleration directly
+python3 run_profiler.py test_ffmpeg_hw.py
+```
+
+### Available Profiling Tools
+
+- **`verify_hw_accel.py`** - Comprehensive hardware acceleration verification
+- **`profiler_test_app.py`** - Main profiling application for performance testing
+- **`analyze_results.py`** - Results analysis and visualization
+- **`test_ffmpeg_hw.py`** - Direct FFmpeg hardware acceleration testing
+- **`test_profiler.py`** - Test suite runner with different configurations
+- **`demo_profiler.py`** - Demo configurations and examples
+
+For detailed documentation, see [`profiler/README.md`](profiler/README.md).
+
 ## Troubleshooting
 #### **Permission Issues with Output Directories**
 If the container cannot write to `/app/frames`, ensure proper permissions:

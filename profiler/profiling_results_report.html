@@ -1,0 +1,52 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Video Pipeline Profiling Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
+                .summary { background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                .metrics { background-color: #f8f8f8; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                .error { background-color: #ffe6e6; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .plot { text-align: center; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>🎯 Video Pipeline Profiling Report</h1>
+                <p><strong>Test File:</strong> profiling_results.json</p>
+                <p><strong>Generated:</strong> 2025-09-01 15:25:21</p>
+            </div>
+            
+            <div class="summary">
+                <h2>📊 Test Summary</h2>
+                <table>
+                    <tr><td>Total Metrics Collected</td><td>38</td></tr>
+                    <tr><td>Test Start</td><td>2025-09-01T15:24:16.800632</td></tr>
+                    <tr><td>Test End</td><td>2025-09-01T15:25:01.498839</td></tr>
+                    <tr><td>Max Active Channels</td><td>8</td></tr>
+                    <tr><td>Max CPU Usage</td><td>29.9%</td></tr>
+                    <tr><td>Max Memory Usage</td><td>1695.6MB</td></tr>
+                    <tr><td>Total Frames Decoded</td><td>255</td></tr>
+                    <tr><td>Total Errors</td><td>0</td></tr>
+                </table>
+            </div>
+        
+            <div class="metrics">
+                <h2>📈 Metrics Statistics</h2>
+                <table>
+                    <tr><th>Metric</th><th>Average</th><th>Min</th><th>Max</th><th>Std Dev</th></tr>
+                    <tr><td>CPU Usage (%)</td><td>15.4</td><td>0.0</td><td>29.9</td><td>7.5</td></tr>
+                    <tr><td>Memory Usage (MB)</td><td>1601.8</td><td>1248.1</td><td>1695.6</td><td>137.2</td></tr>
+                    <tr><td>Active Channels</td><td>7.0</td><td>0.0</td><td>8.0</td><td>2.2</td></tr>
+                    <tr><td>Total Frames</td><td>101.0</td><td>0.0</td><td>255.0</td><td>78.4</td></tr>
+                </table>
+            </div>
+            
+        </body>
+        </html>
+        

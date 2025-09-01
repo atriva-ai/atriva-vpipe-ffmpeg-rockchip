@@ -1,0 +1,376 @@
+{
+  "test_config": {
+    "api_base_url": "http://localhost:8002",
+    "rtsp_urls": [
+      "rtsp://192.168.9.108:8554/stream1",
+      "rtsp://192.168.9.108:8554/stream6",
+      "rtsp://192.168.9.108:8554/stream3",
+      "rtsp://192.168.9.108:8554/stream3",
+      "rtsp://192.168.9.108:8554/stream1",
+      "rtsp://192.168.9.108:8554/stream7",
+      "rtsp://192.168.9.108:8554/stream7",
+      "rtsp://192.168.9.108:8554/stream4"
+    ],
+    "test_duration": 30,
+    "channel_start_delay": 2.0,
+    "fps": 1,
+    "hardware_accel": null,
+    "output_file": "profiling_results.json",
+    "monitor_interval": 1.0
+  },
+  "summary": {
+    "total_metrics": 38,
+    "test_start": "2025-09-01T15:24:16.800632",
+    "test_end": "2025-09-01T15:25:01.498839",
+    "max_channels": 8,
+    "max_cpu_percent": 29.9,
+    "max_memory_mb": 1695.578125,
+    "total_frames": 255,
+    "total_errors": 0
+  },
+  "metrics": [
+    {
+      "timestamp": 1756765456.800632,
+      "cpu_percent": 0.0,
+      "memory_percent": 9.0,
+      "memory_mb": 1248.1015625,
+      "active_channels": 0,
+      "total_frames": 0,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765457.8023093,
+      "cpu_percent": 3.0,
+      "memory_percent": 9.0,
+      "memory_mb": 1254.421875,
+      "active_channels": 0,
+      "total_frames": 0,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765459.8125818,
+      "cpu_percent": 6.1,
+      "memory_percent": 9.1,
+      "memory_mb": 1266.04296875,
+      "active_channels": 2,
+      "total_frames": 0,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765461.820293,
+      "cpu_percent": 10.2,
+      "memory_percent": 9.8,
+      "memory_mb": 1375.54296875,
+      "active_channels": 3,
+      "total_frames": 4,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765463.8209622,
+      "cpu_percent": 7.6,
+      "memory_percent": 9.9,
+      "memory_mb": 1391.55859375,
+      "active_channels": 4,
+      "total_frames": 8,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765465.820885,
+      "cpu_percent": 11.8,
+      "memory_percent": 9.9,
+      "memory_mb": 1399.26171875,
+      "active_channels": 5,
+      "total_frames": 11,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765467.8250723,
+      "cpu_percent": 13.4,
+      "memory_percent": 10.4,
+      "memory_mb": 1465.46875,
+      "active_channels": 6,
+      "total_frames": 18,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765469.8422244,
+      "cpu_percent": 20.2,
+      "memory_percent": 10.8,
+      "memory_mb": 1529.80078125,
+      "active_channels": 7,
+      "total_frames": 30,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765471.8268855,
+      "cpu_percent": 17.9,
+      "memory_percent": 11.0,
+      "memory_mb": 1566.11328125,
+      "active_channels": 8,
+      "total_frames": 42,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765472.8415487,
+      "cpu_percent": 29.9,
+      "memory_percent": 11.1,
+      "memory_mb": 1576.66015625,
+      "active_channels": 8,
+      "total_frames": 46,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765473.8679163,
+      "cpu_percent": 19.2,
+      "memory_percent": 11.1,
+      "memory_mb": 1581.8828125,
+      "active_channels": 8,
+      "total_frames": 51,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765474.8919573,
+      "cpu_percent": 4.0,
+      "memory_percent": 11.1,
+      "memory_mb": 1584.8984375,
+      "active_channels": 8,
+      "total_frames": 52,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765475.9141731,
+      "cpu_percent": 3.6,
+      "memory_percent": 11.1,
+      "memory_mb": 1584.4609375,
+      "active_channels": 8,
+      "total_frames": 53,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765476.9370701,
+      "cpu_percent": 2.2,
+      "memory_percent": 11.1,
+      "memory_mb": 1584.140625,
+      "active_channels": 8,
+      "total_frames": 54,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765477.96771,
+      "cpu_percent": 7.0,
+      "memory_percent": 11.4,
+      "memory_mb": 1623.94140625,
+      "active_channels": 8,
+      "total_frames": 55,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765478.9902,
+      "cpu_percent": 16.6,
+      "memory_percent": 11.6,
+      "memory_mb": 1663.7578125,
+      "active_channels": 8,
+      "total_frames": 61,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765480.045208,
+      "cpu_percent": 8.8,
+      "memory_percent": 11.6,
+      "memory_mb": 1664.0625,
+      "active_channels": 8,
+      "total_frames": 64,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765481.0688694,
+      "cpu_percent": 9.9,
+      "memory_percent": 11.7,
+      "memory_mb": 1680.703125,
+      "active_channels": 8,
+      "total_frames": 69,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765482.1175416,
+      "cpu_percent": 10.6,
+      "memory_percent": 11.8,
+      "memory_mb": 1682.91015625,
+      "active_channels": 8,
+      "total_frames": 73,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765483.1437576,
+      "cpu_percent": 10.6,
+      "memory_percent": 11.8,
+      "memory_mb": 1688.3359375,
+      "active_channels": 8,
+      "total_frames": 78,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765484.1700625,
+      "cpu_percent": 18.8,
+      "memory_percent": 11.8,
+      "memory_mb": 1690.56640625,
+      "active_channels": 8,
+      "total_frames": 86,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765485.19917,
+      "cpu_percent": 20.6,
+      "memory_percent": 11.8,
+      "memory_mb": 1690.52734375,
+      "active_channels": 8,
+      "total_frames": 96,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765486.219133,
+      "cpu_percent": 21.6,
+      "memory_percent": 11.8,
+      "memory_mb": 1690.0703125,
+      "active_channels": 8,
+      "total_frames": 107,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765487.2406394,
+      "cpu_percent": 20.0,
+      "memory_percent": 11.8,
+      "memory_mb": 1689.7265625,
+      "active_channels": 8,
+      "total_frames": 116,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765488.252949,
+      "cpu_percent": 24.2,
+      "memory_percent": 11.8,
+      "memory_mb": 1691.515625,
+      "active_channels": 8,
+      "total_frames": 127,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765489.2794306,
+      "cpu_percent": 18.8,
+      "memory_percent": 11.8,
+      "memory_mb": 1691.6953125,
+      "active_channels": 8,
+      "total_frames": 136,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765490.2952764,
+      "cpu_percent": 18.7,
+      "memory_percent": 11.8,
+      "memory_mb": 1691.4375,
+      "active_channels": 8,
+      "total_frames": 144,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765491.3301423,
+      "cpu_percent": 19.8,
+      "memory_percent": 11.8,
+      "memory_mb": 1690.89453125,
+      "active_channels": 8,
+      "total_frames": 153,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765492.3536491,
+      "cpu_percent": 20.4,
+      "memory_percent": 11.8,
+      "memory_mb": 1690.8515625,
+      "active_channels": 8,
+      "total_frames": 164,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765493.373124,
+      "cpu_percent": 26.2,
+      "memory_percent": 11.8,
+      "memory_mb": 1692.00390625,
+      "active_channels": 8,
+      "total_frames": 173,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765494.3888657,
+      "cpu_percent": 19.5,
+      "memory_percent": 11.8,
+      "memory_mb": 1691.859375,
+      "active_channels": 8,
+      "total_frames": 185,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765495.3983326,
+      "cpu_percent": 19.0,
+      "memory_percent": 11.8,
+      "memory_mb": 1692.01953125,
+      "active_channels": 8,
+      "total_frames": 196,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765496.4138663,
+      "cpu_percent": 21.9,
+      "memory_percent": 11.8,
+      "memory_mb": 1691.58203125,
+      "active_channels": 8,
+      "total_frames": 207,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765497.4269278,
+      "cpu_percent": 15.6,
+      "memory_percent": 11.8,
+      "memory_mb": 1691.8984375,
+      "active_channels": 8,
+      "total_frames": 215,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765498.4429429,
+      "cpu_percent": 24.7,
+      "memory_percent": 11.8,
+      "memory_mb": 1695.578125,
+      "active_channels": 8,
+      "total_frames": 225,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765499.45954,
+      "cpu_percent": 20.8,
+      "memory_percent": 11.8,
+      "memory_mb": 1694.91796875,
+      "active_channels": 8,
+      "total_frames": 236,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765500.474926,
+      "cpu_percent": 21.8,
+      "memory_percent": 11.8,
+      "memory_mb": 1694.5234375,
+      "active_channels": 8,
+      "total_frames": 249,
+      "errors": []
+    },
+    {
+      "timestamp": 1756765501.4988394,
+      "cpu_percent": 18.7,
+      "memory_percent": 11.8,
+      "memory_mb": 1694.07421875,
+      "active_channels": 8,
+      "total_frames": 255,
+      "errors": []
+    }
+  ],
+  "errors": []
+}
