@@ -103,7 +103,9 @@ def get_all_hwaccel():
 
 def get_best_hwaccel(force_format=None):
     """Check available hardware acceleration and return the best option for Rockchip RK3588."""
+    print(f"Force format: {force_format}")
     if force_format and force_format in HW_ACCEL_OPTIONS:
+        print(f"✅ Using forced format - 1: {force_format}")
         return force_format  # Use the forced format if specified and valid
     
     # Test Rockchip hardware acceleration options in priority order
@@ -112,6 +114,7 @@ def get_best_hwaccel(force_format=None):
             print(f"✅ Using software decoding (none)")
             return "none"
         try:
+            print(f"Testing {accel}")
             # Test if the hardware acceleration works by running a simple ffmpeg probe
             test_command = [
                 FFMPEG_PATH, "-hwaccel", accel, "-f", "lavfi", "-i", "nullsrc", "-frames:v", "1", "-f", "null", "-"

@@ -20,7 +20,9 @@ COPY . /app
 # VOLUME ["/app/snapshots"]
 
 # Install python3, python3-venv, and python3-pip for Debian-based Rockchip ARM
-RUN apt-get update && apt-get install -y \
+# Some mirrors have Release files that are "not valid yet" if the container clock differs.
+# Disable APT date validation during update to avoid build failures.
+RUN apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update && apt-get install -y \
     python3 \
     python3-venv \
     python3-pip \
