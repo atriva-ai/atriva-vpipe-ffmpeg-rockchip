@@ -164,11 +164,21 @@ async def decode_video(
         # Build ffmpeg command with Rockchip hardware acceleration
         input_path_str = str(input_path)
         
-        # Get the best hardware acceleration for RK3588
+        # Use rkmpp hardware acceleration by default, fall back to SW if hardware fails
         from app.services.ffmpeg_utils import get_best_hwaccel
+        
+        # Default to rkmpp if no force_format specified
+        if force_format is None:
+            force_format = "rkmpp"
+        
         hw_accel = get_best_hwaccel(force_format)
         print(f"Using RK3588 hardware acceleration: {hw_accel}")
         
+        # Try hardware acceleration first, fall back to software if it fails
+        ffmpeg_cmd = None
+        hw_accel_success = False
+        
+        # Build command with hardware acceleration
         if input_path_str.startswith('rtsp://'):
             if hw_accel == "rkmpp":
                 ffmpeg_cmd = [
@@ -189,6 +199,7 @@ async def decode_video(
                     f"{output_folder}/frame_%04d.jpg"
                 ]
             else:
+                # Software fallback
                 ffmpeg_cmd = [
                     "ffmpeg", "-rtsp_transport", "tcp", "-i", input_path_str,
                     "-vf", f"fps={fps},format=rgb24",
@@ -214,6 +225,7 @@ async def decode_video(
                     f"{output_folder}/frame_%04d.jpg"
                 ]
             else:
+                # Software fallback
                 ffmpeg_cmd = [
                     "ffmpeg", "-i", input_path_str,
                     "-vf", f"fps={fps},format=rgb24",
@@ -225,24 +237,69 @@ async def decode_video(
         
         # Wait a short time to check if the process starts successfully
         import time
-        time.sleep(1)
+        time.sleep(2)
         
         # Check if process is still running and if there are any immediate errors
         if proc.poll() is not None:
             # Process exited immediately - get error output
             stdout, stderr = proc.communicate()
             error_output = stderr.decode('utf-8', errors='ignore')
-            error_msg = f"FFmpeg process failed to start: {error_output}"
-            print(f"Error in decode for camera {camera_id}: {error_msg}")
+            print(f"Hardware acceleration failed, trying software fallback: {error_output}")
             
-            with task_lock:
-                decode_tasks[camera_id] = {
-                    'process': None,
-                    'output_folder': str(output_folder),
-                    'status': 'error',
-                    'last_error': error_msg
-                }
-            raise HTTPException(status_code=500, detail=error_msg)
+            # Try software fallback if hardware acceleration failed
+            if hw_accel != "none":
+                print(f"🔄 Falling back to software decoding for camera {camera_id}")
+                
+                # Build software fallback command
+                if input_path_str.startswith('rtsp://'):
+                    fallback_cmd = [
+                        "ffmpeg", "-rtsp_transport", "tcp", "-i", input_path_str,
+                        "-vf", f"fps={fps},format=rgb24",
+                        f"{output_folder}/frame_%04d.jpg"
+                    ]
+                else:
+                    fallback_cmd = [
+                        "ffmpeg", "-i", input_path_str,
+                        "-vf", f"fps={fps},format=rgb24",
+                        f"{output_folder}/frame_%04d.jpg"
+                    ]
+                
+                print(f"Running software fallback command: {fallback_cmd}")
+                proc = subprocess.Popen(fallback_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+                # Wait again to check if software fallback works
+                time.sleep(2)
+                
+                if proc.poll() is not None:
+                    # Software fallback also failed
+                    stdout, stderr = proc.communicate()
+                    error_output = stderr.decode('utf-8', errors='ignore')
+                    error_msg = f"Both hardware and software decoding failed: {error_output}"
+                    print(f"Error in decode for camera {camera_id}: {error_msg}")
+                    
+                    with task_lock:
+                        decode_tasks[camera_id] = {
+                            'process': None,
+                            'output_folder': str(output_folder),
+                            'status': 'error',
+                            'last_error': error_msg
+                        }
+                    raise HTTPException(status_code=500, detail=error_msg)
+                else:
+                    print(f"✅ Software fallback successful for camera {camera_id}")
+            else:
+                # Already using software, no fallback available
+                error_msg = f"Software decoding failed: {error_output}"
+                print(f"Error in decode for camera {camera_id}: {error_msg}")
+                
+                with task_lock:
+                    decode_tasks[camera_id] = {
+                        'process': None,
+                        'output_folder': str(output_folder),
+                        'status': 'error',
+                        'last_error': error_msg
+                    }
+                raise HTTPException(status_code=500, detail=error_msg)
         
         # Register the task as running
         with task_lock:
@@ -441,7 +498,6 @@ async def get_latest_frame(camera_id: str):
             current_time = time.time()
             frame_mtime = latest_frame_path.stat().st_mtime
             if current_time - frame_mtime > 300:  # 5 minutes = 300 seconds
-                print(f"Warning: Latest frame for camera {camera_id} is too old ({current_time - frame_mtime:.1f}s), cleaning up")
                 cleanup_camera_frames(camera_id)
                 raise HTTPException(status_code=500, detail="Latest frame is too old, frames have been cleaned up")
             
@@ -451,5 +507,42 @@ async def get_latest_frame(camera_id: str):
         # Re-raise HTTP exceptions as-is
         raise
     except Exception as e:
-        print(f"Error getting latest frame for camera {camera_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get latest frame: {str(e)}")
+
+@router.post("/stop-decode/")
+async def stop_decode(camera_id: str = Form(...)):
+    """Stop decoding for a specific camera."""
+    print(f"[DEBUG] /stop-decode/ called with camera_id={camera_id}")
+    
+    with task_lock:
+        task = decode_tasks.get(camera_id)
+        if not task:
+            return {
+                "message": "No decode task found for camera",
+                "camera_id": camera_id,
+                "status": "not_found"
+            }
+        
+        proc = task['process']
+        if proc and is_process_running(proc):
+            print(f"Stopping decode process for camera {camera_id}")
+            proc.terminate()
+            # Wait a bit for graceful termination
+            import time
+            time.sleep(1)
+            if is_process_running(proc):
+                print(f"Force killing decode process for camera {camera_id}")
+                proc.kill()
+            
+            task['status'] = 'stopped'
+            task['process'] = None
+            print(f"✅ Decode process stopped for camera {camera_id}")
+        else:
+            print(f"Decode process for camera {camera_id} was not running")
+            task['status'] = 'stopped'
+        
+        return {
+            "message": "Decode stopped",
+            "camera_id": camera_id,
+            "status": "stopped"
+        }
